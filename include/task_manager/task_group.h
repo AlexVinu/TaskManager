@@ -7,7 +7,7 @@
 #include <type_traits>
 
 namespace task_manager {
-    class TaskGroup : ITaskGroup
+    class TaskGroup : public ITaskGroup
     {
     public:
         TaskGroup();

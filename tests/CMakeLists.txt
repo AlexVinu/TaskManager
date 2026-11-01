@@ -17,6 +17,9 @@ add_executable(test_task_manager
 add_executable(test_task_group
         test_task_group.cpp)
 
+add_executable(test_i_task_group
+        test_i_task_group.cpp)
+
 target_link_libraries(test_task_manager
     PRIVATE
     GTest::gtest_main
@@ -29,6 +32,13 @@ target_link_libraries(test_task_group
     task_manager       
 )
 
+target_link_libraries(test_i_task_group
+    PRIVATE
+    GTest::gtest_main
+    task_manager       
+)
+
 include(GoogleTest)
 gtest_discover_tests(test_task_manager)
 gtest_discover_tests(test_task_group)
+gtest_discover_tests(test_i_task_group)

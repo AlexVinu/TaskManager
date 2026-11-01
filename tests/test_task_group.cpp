@@ -13,14 +13,11 @@ TEST_F(TaskGroupFixture, RunTaskAndWait)
     TaskGroup taskGroup;
 
     bool taskExecuted = false;
+    int num = 0;
 
-    taskGroup.RunTask([](bool& flag){flag = true;}, taskExecuted);
+    taskGroup.RunTask([](bool& flag, int& n){flag = true; n = 42;}, taskExecuted, num);
     taskGroup.Wait();
 
     ASSERT_TRUE(taskExecuted);
-
-    int num = 0;
-    taskGroup.RunTask([](int& n){n = 42;}, num);
-    taskGroup.Wait();
     ASSERT_EQ(num, 42);
 }

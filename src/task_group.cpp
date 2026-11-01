@@ -20,7 +20,7 @@ namespace task_manager {
 
     TaskGroup::~TaskGroup() 
     {
-        p_Impl->taskGroup.wait();
+        Wait();
     }
 
     void TaskGroup::RunITask(ITask* task) 
@@ -37,4 +37,13 @@ namespace task_manager {
         p_Impl->tasks.clear();
     }
 
+    ITaskGroup* CreateTaskGroup() 
+    {
+        return new TaskGroup;
+    }
+
+    void DestroyTaskGroup(ITaskGroup* taskGroup) 
+    {
+        delete taskGroup;
+    }
 }
