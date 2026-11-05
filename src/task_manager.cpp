@@ -1,30 +1,28 @@
-#include "task_manager/task_manager.h"
+#include "task_manager/internal/task_manager.h"
 
 #include <oneapi/tbb.h>
 
-namespace task_manager {
-    struct TaskManager::Impl 
+struct tm_TaskManager::Impl 
+{
+    tbb::task_arena arena;
+    Impl(uint8_t max_threads) : arena(max_threads) {}
+    ~Impl()
     {
-        tbb::task_arena arena;
-        Impl(uint8_t max_threads) : arena(max_threads) {}
-        ~Impl()
-        {
-            arena.terminate();
-        }
-    };
-
-    TaskManager::TaskManager(uint8_t max_threads) 
-    {
-        p_Impl = std::make_unique<Impl>(max_threads);
+        arena.terminate();
     }
+};
 
-    TaskManager::~TaskManager() 
-    {
-        
-    }
+tm_TaskManager::tm_TaskManager(uint8_t max_threads) 
+{
+    p_Impl = std::make_unique<Impl>(max_threads);
+}
 
-    const uint8_t TaskManager::GetMaxThreads() const
-    {
-        return p_Impl->arena.max_concurrency();
-    }
+tm_TaskManager::~tm_TaskManager() 
+{
+    
+}
+
+const uint8_t tm_TaskManager::GetMaxThreads() const
+{
+    return p_Impl->arena.max_concurrency();
 }

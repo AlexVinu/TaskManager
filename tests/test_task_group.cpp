@@ -1,21 +1,24 @@
 #include <gtest/gtest.h>
-#include "task_manager/task_manager.h"
-
-using namespace task_manager;
+#include <tuple>
+#include "task_manager/internal/task_manager.h"
 
 struct TaskGroupFixture: public testing::Test 
 {
-    TaskManager taskManager;
+    tm_TaskManager taskManager;
 };
 
 TEST_F(TaskGroupFixture, RunTaskAndWait) 
 {
-    TaskGroup taskGroup;
+    tm_TaskGroup taskGroup;
 
     bool taskExecuted = false;
     int num = 0;
 
-    taskGroup.RunTask([](bool& flag, int& n){flag = true; n = 42;}, taskExecuted, num);
+    taskGroup.RunTask([](void* ctx){
+        auto context = static_cast<std::tuple<bool&, int&>*>(ctx);
+        std::get<0>(*context) = true;
+        std::get<1>(*context) = 42;
+    }, taskExecuted, num);
     taskGroup.Wait();
 
     ASSERT_TRUE(taskExecuted);

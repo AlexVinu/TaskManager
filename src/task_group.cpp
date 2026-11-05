@@ -1,49 +1,65 @@
-#include "task_manager/task_group.h"
+#include "task_manager/internal/task_group.h"
+#include "task_manager/api/task_group_api.h"
+#include "task_manager/internal/task.h"
 
 #include <oneapi/tbb.h>
 #include <vector>
 
-namespace task_manager {
 
-    auto ITaskDeleter = [](ITask* task) { task->Destroy(); };
+struct tm_TaskGroup::Impl 
+{
+    tbb::task_group task_group;
+    std::vector<std::unique_ptr<tm_Task>> tasks;
+};
 
-    struct TaskGroup::Impl 
-    {
-        tbb::task_group taskGroup;
-        std::vector<std::unique_ptr<ITask, decltype(ITaskDeleter)>> tasks;
-    };
+tm_TaskGroup::tm_TaskGroup() 
+{
+    p_Impl = std::make_unique<Impl>();
+}
 
-    TaskGroup::TaskGroup() 
-    {
-        p_Impl = std::make_unique<Impl>();
-    }
+tm_TaskGroup::~tm_TaskGroup() 
+{
+    Wait();
+}
 
-    TaskGroup::~TaskGroup() 
-    {
-        Wait();
-    }
+void tm_TaskGroup::RunTask(tm_Task* task) 
+{
+    p_Impl->task_group.run([task]() {
+        task->Execute();
+    });
+    p_Impl->tasks.emplace_back(task);
+}
 
-    void TaskGroup::RunITask(ITask* task) 
-    {
-        p_Impl->taskGroup.run([task]() {
-            task->Execute();
-        });
-        p_Impl->tasks.emplace_back(task);
-    }
+void tm_TaskGroup::RunTask(tm_TaskDescriptor* desc)
+{
+    auto task = new tm_Task(desc->execute_callback, desc->destroy_callback, desc->ctx);
+    RunTask(task);
+}
 
-    void TaskGroup::Wait() 
-    {
-        p_Impl->taskGroup.wait();
-        p_Impl->tasks.clear();
-    }
+void tm_TaskGroup::Wait() 
+{
+    p_Impl->task_group.wait();
+    p_Impl->tasks.clear();
+}
 
-    ITaskGroup* CreateTaskGroup() 
-    {
-        return new TaskGroup;
-    }
+void CALL RunTask(tm_TaskDescriptor* desc, tm_TaskGroup* task_group)
+{
+    task_group->RunTask(desc);
+}
 
-    void DestroyTaskGroup(ITaskGroup* taskGroup) 
-    {
-        delete taskGroup;
-    }
+void CALL Wait(tm_TaskGroup* task_group)
+{
+    task_group->Wait();
+}
+
+static const tm_TaskGroupApi task_group_api = 
+{
+    sizeof(tm_TaskGroupApi),
+    &RunTask,
+    &Wait
+};
+
+extern "C" const tm_TaskGroupApi* CALL tm_GetTaskGroupApi()
+{
+    return &task_group_api;
 }

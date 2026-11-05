@@ -1,10 +1,8 @@
 #include <gtest/gtest.h>
-#include "task_manager/task_manager.h"
-
-using namespace task_manager;
+#include "task_manager/internal/task_manager.h"
 
 TEST(TaskManagerTest, CreateTaskManager) 
 {
-    TaskManager taskManager;
+    tm_TaskManager taskManager;
     ASSERT_GT(taskManager.GetMaxThreads(), 0);
 };

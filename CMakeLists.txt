@@ -26,6 +26,7 @@ target_sources(task_manager
     PRIVATE
         src/task_manager.cpp
         src/task_group.cpp
+        src/task.cpp
 
     PUBLIC
         FILE_SET public_headers
@@ -33,11 +34,12 @@ target_sources(task_manager
         BASE_DIRS
             "${CMAKE_CURRENT_SOURCE_DIR}/include"
         FILES
-            include/task_manager/i_task.h
-            include/task_manager/task.h
-            include/task_manager/task_manager.h
-            include/task_manager/task_group.h
-            include/task_manager/i_task_group.h
+            include/task_manager/api/core.h
+            include/task_manager/api/task_desc.h
+
+            include/task_manager/internal/task_manager.h
+            include/task_manager/internal/task_group.h
+            include/task_manager/internal/task.h
 )
 
 target_include_directories(task_manager
